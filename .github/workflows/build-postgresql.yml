@@ -8,16 +8,17 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  # bitnami/containers commit for PostgreSQL 15.4.0-debian-11-r45
-  BITNAMI_CONTAINERS_COMMIT: 4592f70a9b9ada959622ace6370b1e47eff4b7fc
-  POSTGRESQL_IMAGE_TAG: 15.4.0-debian-11-r45
 
 jobs:
-  build-and-push:
+  build-and-push-15-4-0-debian-11-r45:
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
+    env:
+      # bitnami/containers commit for PostgreSQL 15.4.0-debian-11-r45
+      BITNAMI_CONTAINERS_COMMIT: 4592f70a9b9ada959622ace6370b1e47eff4b7fc
+      POSTGRESQL_IMAGE_TAG: 15.4.0-debian-11-r45
 
     steps:
       - name: Set lowercase image name
@@ -49,3 +50,43 @@ jobs:
             ${{ steps.image.outputs.name }}:${{ env.POSTGRESQL_IMAGE_TAG }}
             ${{ steps.image.outputs.name }}:15.4.0-debian-11
             ${{ steps.image.outputs.name }}:latest
+
+  build-and-push-16-1-0-debian-11-r25:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      # bitnami/containers commit for PostgreSQL 16.1.0-debian-11-r25
+      BITNAMI_CONTAINERS_COMMIT: 7e9eee6a113270d5d76f9e320c0473fb7edc3be6
+      POSTGRESQL_IMAGE_TAG: 16.1.0-debian-11-r25
+
+    steps:
+      - name: Set lowercase image name
+        id: image
+        run: echo "name=${REGISTRY}/$(echo "${GITHUB_REPOSITORY}" | tr '[:upper:]' '[:lower:]')/postgresql" >> "$GITHUB_OUTPUT"
+        env:
+          REGISTRY: ${{ env.REGISTRY }}
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Checkout Bitnami containers at PostgreSQL 16.1.0-debian-11-r25
+        uses: actions/checkout@v4
+        with:
+          repository: bitnami/containers
+          ref: ${{ env.BITNAMI_CONTAINERS_COMMIT }}
+          path: bitnami-containers
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: bitnami-containers/bitnami/postgresql/16/debian-11
+          push: true
+          tags: |
+            ${{ steps.image.outputs.name }}:${{ env.POSTGRESQL_IMAGE_TAG }}
+            ${{ steps.image.outputs.name }}:16.1.0-debian-11
