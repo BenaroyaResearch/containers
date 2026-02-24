@@ -1,0 +1,51 @@
+name: Build and Push Keycloak Image
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  # bitnami/containers commit for Keycloak 23.0.6-debian-11-r19 (last published release)
+  BITNAMI_CONTAINERS_COMMIT: eeec539ca1b6d4672d25dbed3c10e8949aa4e431
+  KEYCLOAK_IMAGE_TAG: 23.0.6-debian-11-r19
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Set lowercase image name
+        id: image
+        run: echo "name=${REGISTRY}/$(echo "${GITHUB_REPOSITORY}" | tr '[:upper:]' '[:lower:]')/keycloak" >> "$GITHUB_OUTPUT"
+        env:
+          REGISTRY: ${{ env.REGISTRY }}
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Checkout Bitnami containers at Keycloak 23.0.6-debian-11-r19
+        uses: actions/checkout@v4
+        with:
+          repository: bitnami/containers
+          ref: ${{ env.BITNAMI_CONTAINERS_COMMIT }}
+          path: bitnami-containers
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: bitnami-containers/bitnami/keycloak/23/debian-11
+          push: true
+          tags: |
+            ${{ steps.image.outputs.name }}:${{ env.KEYCLOAK_IMAGE_TAG }}
+            ${{ steps.image.outputs.name }}:23.0.6-debian-11
+            ${{ steps.image.outputs.name }}:latest
