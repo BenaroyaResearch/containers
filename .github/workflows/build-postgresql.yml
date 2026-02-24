@@ -10,7 +10,7 @@ env:
   REGISTRY: ghcr.io
 
 jobs:
-  build-and-push:
+  build-and-push-15-4-0-debian-11-r45:
     runs-on: ubuntu-latest
     permissions:
       contents: read
