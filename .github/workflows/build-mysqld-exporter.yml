@@ -1,0 +1,51 @@
+name: Build and Push MySQL Exporter Image
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  # bitnami/containers commit for MySQL Exporter 0.16.0-debian-12-r4
+  BITNAMI_CONTAINERS_COMMIT: 5767c2a01b0049edf7d35f629766b5842081c3ee
+  MYSQLD_EXPORTER_IMAGE_TAG: 0.16.0-debian-12-r4
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Set lowercase image name
+        id: image
+        run: echo "name=${REGISTRY}/$(echo "${GITHUB_REPOSITORY}" | tr '[:upper:]' '[:lower:]')/mysqld-exporter" >> "$GITHUB_OUTPUT"
+        env:
+          REGISTRY: ${{ env.REGISTRY }}
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Checkout Bitnami containers at MySQL Exporter 0.16.0-debian-12-r4
+        uses: actions/checkout@v4
+        with:
+          repository: bitnami/containers
+          ref: ${{ env.BITNAMI_CONTAINERS_COMMIT }}
+          path: bitnami-containers
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: bitnami-containers/bitnami/mysqld-exporter/0/debian-12
+          push: true
+          tags: |
+            ${{ steps.image.outputs.name }}:${{ env.MYSQLD_EXPORTER_IMAGE_TAG }}
+            ${{ steps.image.outputs.name }}:0.16.0-debian-12
+            ${{ steps.image.outputs.name }}:latest
