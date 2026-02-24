@@ -6,6 +6,12 @@ on:
       - main
     paths:
       - 'bitnami/keycloak/**'
+      - 'bitnami/keycloak-config-cli/**'
+      - 'bitnami/kubectl/**'
+      - 'bitnami/mysql/**'
+      - 'bitnami/mysqld-exporter/**'
+      - 'bitnami/os-shell/**'
+      - 'bitnami/postgres-exporter/**'
       - 'bitnami/postgresql/**'
   workflow_dispatch:
 
@@ -39,6 +45,162 @@ jobs:
           tags: |
             ${{ env.REGISTRY }}/${{ env.ORG }}/bitnami/keycloak:latest
             ${{ env.REGISTRY }}/${{ env.ORG }}/bitnami/keycloak:${{ github.sha }}
+
+  build-keycloak-config-cli:
+    runs-on: ubuntu-latest
+    name: Build Keycloak Config CLI Image
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push Keycloak Config CLI Image
+        uses: docker/build-push-action@v5
+        with:
+          context: bitnami/keycloak-config-cli/6/debian-12
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.ORG }}/bitnami/keycloak-config-cli:latest
+            ${{ env.REGISTRY }}/${{ env.ORG }}/bitnami/keycloak-config-cli:${{ github.sha }}
+
+  build-kubectl:
+    runs-on: ubuntu-latest
+    name: Build kubectl Image
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push kubectl Image
+        uses: docker/build-push-action@v5
+        with:
+          context: bitnami/kubectl/1.35/debian-12
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.ORG }}/bitnami/kubectl:latest
+            ${{ env.REGISTRY }}/${{ env.ORG }}/bitnami/kubectl:${{ github.sha }}
+
+  build-mysql:
+    runs-on: ubuntu-latest
+    name: Build MySQL Image
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push MySQL Image
+        uses: docker/build-push-action@v5
+        with:
+          context: bitnami/mysql/9.6/debian-12
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.ORG }}/bitnami/mysql:latest
+            ${{ env.REGISTRY }}/${{ env.ORG }}/bitnami/mysql:${{ github.sha }}
+
+  build-mysqld-exporter:
+    runs-on: ubuntu-latest
+    name: Build MySQL Exporter Image
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push MySQL Exporter Image
+        uses: docker/build-push-action@v5
+        with:
+          context: bitnami/mysqld-exporter/0/debian-12
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.ORG }}/bitnami/mysqld-exporter:latest
+            ${{ env.REGISTRY }}/${{ env.ORG }}/bitnami/mysqld-exporter:${{ github.sha }}
+
+  build-os-shell:
+    runs-on: ubuntu-latest
+    name: Build OS Shell Image
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push OS Shell Image
+        uses: docker/build-push-action@v5
+        with:
+          context: bitnami/os-shell/12/debian-12
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.ORG }}/bitnami/os-shell:latest
+            ${{ env.REGISTRY }}/${{ env.ORG }}/bitnami/os-shell:${{ github.sha }}
+
+  build-postgres-exporter:
+    runs-on: ubuntu-latest
+    name: Build PostgreSQL Exporter Image
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push PostgreSQL Exporter Image
+        uses: docker/build-push-action@v5
+        with:
+          context: bitnami/postgres-exporter/0/debian-12
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.ORG }}/bitnami/postgres-exporter:latest
+            ${{ env.REGISTRY }}/${{ env.ORG }}/bitnami/postgres-exporter:${{ github.sha }}
 
   build-postgresql:
     runs-on: ubuntu-latest
