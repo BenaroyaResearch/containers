@@ -1,0 +1,67 @@
+name: Build and Push Docker Images
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'bitnami/keycloak/**'
+      - 'bitnami/postgresql/**'
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  ORG: benaroyaresearch
+
+jobs:
+  build-keycloak:
+    runs-on: ubuntu-latest
+    name: Build Keycloak Image
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push Keycloak Image
+        uses: docker/build-push-action@v5
+        with:
+          context: bitnami/keycloak/26/debian-12
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.ORG }}/bitnami/keycloak:latest
+            ${{ env.REGISTRY }}/${{ env.ORG }}/bitnami/keycloak:${{ github.sha }}
+
+  build-postgresql:
+    runs-on: ubuntu-latest
+    name: Build PostgreSQL Image
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push PostgreSQL Image
+        uses: docker/build-push-action@v5
+        with:
+          context: bitnami/postgresql/18/debian-12
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.ORG }}/bitnami/postgresql:latest
+            ${{ env.REGISTRY }}/${{ env.ORG }}/bitnami/postgresql:${{ github.sha }}
